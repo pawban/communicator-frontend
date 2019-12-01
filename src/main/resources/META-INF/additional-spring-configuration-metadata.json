@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "backend.address",
+      "type": "java.lang.String",
+      "description": "The address of the backend service."
+    },
+    {
+      "name": "backend.version",
+      "type": "java.lang.String",
+      "description": "Version of the rest service to use."
+    }
+  ]
+}
