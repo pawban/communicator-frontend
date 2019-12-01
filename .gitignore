@@ -30,3 +30,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### DEV CONFIG ###
+application-dev.properties
+
+### NODE.JS ###
+/node_modules
