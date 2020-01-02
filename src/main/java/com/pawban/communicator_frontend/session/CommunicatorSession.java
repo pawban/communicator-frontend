@@ -1,34 +1,48 @@
 package com.pawban.communicator_frontend.session;
 
-import com.pawban.communicator_frontend.domain.Country;
-import com.pawban.communicator_frontend.domain.Session;
+import com.pawban.communicator_frontend.domain.ChatRoom;
 import com.pawban.communicator_frontend.domain.User;
-import com.pawban.communicator_frontend.domain.UserStatus;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
 @VaadinSessionScope
+@NoArgsConstructor
 @Getter
 @Setter
 public class CommunicatorSession {
 
-    //    private UUID sessionId = null;
-    private UUID sessionId = UUID.randomUUID();
-    //    private User user = null;
-    private User user = new User(
-            UUID.randomUUID(),
-            "gawelx",
-            new Country("Poland", "POL", ""),
-            new UserStatus("visible", true));
+    private UUID sessionId;
+    private User user;
+    private UUID currentChatRoomId;
+    private Set<ChatRoom> chatRooms = new HashSet<>();
 
-    public void setSession(final Session session) {
+    public void setSession(final SessionData session) {
         this.sessionId = session.getSessionId();
         this.user = session.getUser();
+    }
+
+    public boolean isCurrentUserMemberOf(final UUID chatRoomId) {
+        return chatRooms.stream()
+                .anyMatch(chatRoom -> chatRoom.getId().equals(chatRoomId));
+    }
+
+    public boolean isCurrentUserOwnerOf(final ChatRoom chatRoom) {
+        return chatRoom.getOwner().getId().equals(user.getId());
+    }
+
+    public Optional<ChatRoom> getChatRoom(final UUID chatRoomId) {
+        return chatRooms.stream()
+                .filter(room -> room.getId().equals(chatRoomId))
+                .findFirst();
     }
 
 }
