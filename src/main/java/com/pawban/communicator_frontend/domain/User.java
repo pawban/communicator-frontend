@@ -19,15 +19,10 @@ public class User {
     private UUID id;
     private String username;
     private Country country;
-    private UserStatus status;
+    private Boolean visible;
 
     public User(final UserDto userDto) {
-        this(
-                userDto.getId(),
-                userDto.getUsername(),
-                new Country(userDto.getCountry()),
-                new UserStatus(userDto.getStatus())
-        );
+        this(userDto.getId(), userDto.getUsername(), new Country(userDto.getCountry()), userDto.getVisible());
     }
 
 }

@@ -17,11 +17,7 @@ public class Country {
     private String flagUrl;
 
     public Country(final CountryDto countryDto) {
-        this(
-                countryDto.getName(),
-                countryDto.getCountryCode(),
-                countryDto.getFlagUrl()
-        );
+        this(countryDto.getName(), countryDto.getCountryCode(), countryDto.getFlagUrl());
     }
 
 }
