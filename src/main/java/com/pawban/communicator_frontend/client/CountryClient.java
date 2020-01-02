@@ -33,8 +33,7 @@ public class CountryClient {
     }
 
     public List<Country> getCountries() {
-        String endpoint = backendConfig.getCountriesEndpoint();
-        URI url = UriComponentsBuilder.fromHttpUrl(endpoint)
+        URI url = UriComponentsBuilder.fromHttpUrl(backendConfig.getCountriesEndpoint())
                 .build(true)
                 .toUri();
         try {
