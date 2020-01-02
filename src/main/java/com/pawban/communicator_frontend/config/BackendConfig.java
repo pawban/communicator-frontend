@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BackendConfig {
 
+    public static final String AUTH_HEADER = "X-Auth-Key";
+
     @Getter(AccessLevel.PRIVATE)
     private final String rest = "rest";
     @Getter(AccessLevel.PRIVATE)
@@ -23,9 +25,14 @@ public class BackendConfig {
     @Getter(lazy = true)
     private final String usersEndpoint = getAddress() + "/" + getVersion() + "/" + getRest() + "/users";
     @Getter(lazy = true)
-    private final String userStatusesEndpoint = getUsersEndpoint() + "/statuses";
-    @Getter(lazy = true)
     private final String usernameValidationEndpoint = getAddress() + "/" + getVersion() + "/" + getRpc() +
             "/isUsernameAvailable";
+    @Getter(lazy = true)
+    private final String chatRoomsEndpoint = getAddress() + "/" + getVersion() + "/" + getRest() + "/chatRooms";
+    @Getter(lazy = true)
+    private final String accessRequestsEndpoint = getAddress() + "/" + getVersion() + "/" + getRest() +
+            "/users/accessRequests";
+    @Getter(lazy = true)
+    private final String messagesEndpoint = getAddress() + "/" + getVersion() + "/" + getRest() + "/messages";
 
 }

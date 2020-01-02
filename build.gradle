@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.2.1.RELEASE'
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
 }
@@ -10,14 +10,18 @@ sourceCompatibility = '1.8'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://maven.vaadin.com/vaadin-addons'
+    }
 }
 
 ext {
-    set('vaadinVersion', "14.0.13")
+    set('vaadinVersion', "14.1.3")
 }
 
 dependencies {
     implementation 'com.vaadin:vaadin-spring-boot-starter'
+    implementation 'ch.carnet.kasparscherrer:scrolllayout:2.0.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
