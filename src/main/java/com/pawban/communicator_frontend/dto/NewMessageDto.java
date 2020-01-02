@@ -3,13 +3,17 @@ package com.pawban.communicator_frontend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class UsernameValidationDto {
+@Setter
+public class NewMessageDto {
 
-    private String username;
-    private Boolean available;
+    private String text;
+    private UUID chatRoomId;
 
 }

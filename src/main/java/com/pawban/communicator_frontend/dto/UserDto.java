@@ -17,14 +17,14 @@ public class UserDto {
     private UUID id;
     private String username;
     private CountryDto country;
-    private UserStatusDto status;
+    private Boolean visible;
 
     public UserDto(final User user) {
         this(
                 user.getId(),
                 user.getUsername(),
                 new CountryDto(user.getCountry()),
-                new UserStatusDto(user.getStatus())
+                user.getVisible()
         );
     }
 
