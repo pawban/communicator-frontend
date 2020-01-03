@@ -1,4 +1,4 @@
-package com.pawban.communicator_frontend.view.communicator.component;
+package com.pawban.communicator_frontend.view.communicator.dialog;
 
 import com.vaadin.flow.component.notification.Notification;
 

@@ -23,7 +23,6 @@ import com.pawban.communicator_frontend.view.communicator.component.ChatRoomsPan
 import com.pawban.communicator_frontend.view.communicator.component.ChatRoomsTabs;
 import com.pawban.communicator_frontend.view.communicator.component.ChatRoomsTabsLayout;
 import com.pawban.communicator_frontend.view.communicator.component.CreateNewChatRoomIcon;
-import com.pawban.communicator_frontend.view.communicator.component.CustomNotification;
 import com.pawban.communicator_frontend.view.communicator.component.DeleteChatRoomIcon;
 import com.pawban.communicator_frontend.view.communicator.component.DeleteUserIcon;
 import com.pawban.communicator_frontend.view.communicator.component.EnterMessagePanel;
@@ -40,6 +39,7 @@ import com.pawban.communicator_frontend.view.communicator.component.UsersPanel;
 import com.pawban.communicator_frontend.view.communicator.component.VisibilityIcon;
 import com.pawban.communicator_frontend.view.communicator.dialog.ChatRoomCloseConfirmDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.ChatRoomDeleteConfirmDialog;
+import com.pawban.communicator_frontend.view.communicator.dialog.CustomNotification;
 import com.pawban.communicator_frontend.view.communicator.dialog.ErrorDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewAccessRequestDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewChatRoomDialog;
