@@ -29,10 +29,10 @@ public class AccessRequestService {
         return accessRequestClient.getAccessRequests(sessionId, AccessRequestRole.CHAT_ROOM_OWNER);
     }
 
-    public AccessRequest createAccessRequest(final UUID sessionId,
-                                             final UUID chatRoomId,
-                                             final String request) {
-        return accessRequestClient.createAccessRequest(sessionId, chatRoomId, request)
+    public void createAccessRequest(final UUID sessionId,
+                                    final UUID chatRoomId,
+                                    final String request) {
+        accessRequestClient.createAccessRequest(sessionId, chatRoomId, request)
                 .orElseThrow(() -> new RequestUnsuccessfulException(
                         sessionId,
                         "Unable to create new access request to join chat room with id = '" +
