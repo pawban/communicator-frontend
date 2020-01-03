@@ -97,7 +97,6 @@ public class AccessRequestClient {
                 .queryParam("status", newStatus.getValue())
                 .build(true)
                 .toUri();
-        LOGGER.info(url.toString());
         try {
             ResponseEntity<AccessRequestDto> responseEntity =
                     restTemplate.exchange(url, HttpMethod.PUT, entityBuilder.buildHeaders(sessionId), AccessRequestDto.class);
