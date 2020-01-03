@@ -62,7 +62,6 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
     private Icon createVisibilityIcon(final ChatRoom chatRoom) {
         ChatRoomStatus status = chatRoom.getStatus();
         Icon icon = new Icon(status.equals(ChatRoomStatus.PUBLIC) ? VaadinIcon.EYE : VaadinIcon.EYE_SLASH);
-//        if (chatRoom.getOwner().getId().equals(session.getUser().getId())) {
         if (session.isCurrentUserOwnerOf(chatRoom)) {
             icon.getElement().setAttribute("title", "Click to toggle status of this chat room.");
             icon.getStyle().set("cursor", "pointer");
