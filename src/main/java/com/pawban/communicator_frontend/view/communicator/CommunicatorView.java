@@ -56,6 +56,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -138,9 +140,21 @@ public class CommunicatorView extends HorizontalLayout {
     }
 
     private void registerSchedulerTasks() {
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(this::refreshView, 5000L));
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(this::refreshMessages, 2500L));
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(this::checkPendingAccessRequests, 30000L));
+        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
+                this::refreshView,
+                Date.from(Instant.now().plusMillis(5000L)),
+                5000L
+        ));
+        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
+                this::refreshMessages,
+                Date.from(Instant.now().plusMillis(2500L)),
+                2500L
+        ));
+        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
+                this::checkPendingAccessRequests,
+                Date.from(Instant.now().plusMillis(30000L)),
+                30000L
+        ));
     }
 
     private void unregisterSchedulerTasks() {
