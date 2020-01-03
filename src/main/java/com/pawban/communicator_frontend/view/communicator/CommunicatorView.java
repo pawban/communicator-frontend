@@ -6,6 +6,7 @@ import com.pawban.communicator_frontend.domain.Member;
 import com.pawban.communicator_frontend.domain.Message;
 import com.pawban.communicator_frontend.domain.User;
 import com.pawban.communicator_frontend.exception.RequestUnsuccessfulException;
+import com.pawban.communicator_frontend.exception.UIInaccessibleException;
 import com.pawban.communicator_frontend.service.AccessRequestService;
 import com.pawban.communicator_frontend.service.ChatRoomService;
 import com.pawban.communicator_frontend.service.MessageService;
@@ -151,18 +152,29 @@ public class CommunicatorView extends HorizontalLayout {
         scheduledFutures.clear();
     }
 
-    private void checkPendingAccessRequests() {
-        try {
-            UI ui = getUI().orElseThrow(RuntimeException::new);
-            ui.access(() -> {
-                Set<AccessRequest> accessRequests =
-                        accessRequestService.getPendingAccessRequestsOfChatRoomOwner(session.getSessionId());
-                accessRequests.forEach(accessRequest -> new ReceivedAccessRequestDialog(
-                        accessRequest,
-                        this::processAccessRequest
-                ).open());
-            });
-        } catch (RequestUnsuccessfulException e) {
+    private void refreshView() {
+        UI ui = getUI().orElseThrow(UIInaccessibleException::new);
+        ui.access(() -> {
+            refreshSessionData();
+            refreshChatRooms();
+            refreshUsers();
+        });
+    }
+
+    private void refreshMessages() {
+        ChatRoomTab tab = chatRoomsTabs.getSelectedTab();
+        if (tab != null) {
+            List<Message> newMessages = messageService.getNewMessagesOfChatRoom(
+                    session.getSessionId(),
+                    tab.getChatRoom()
+            );
+            if (!newMessages.isEmpty()) {
+                UI ui = getUI().orElseThrow(UIInaccessibleException::new);
+                ui.access(() -> tabsToChatRooms.get(tab).add(newMessages.stream()
+                        .map(MessageComponent::new)
+                        .collect(Collectors.toList())
+                ));
+            }
         }
     }
 
@@ -179,13 +191,19 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void refreshView() {
-        UI ui = getUI().orElseThrow(RuntimeException::new);
-        ui.access(() -> {
-            refreshSessionData();
-            refreshChatRooms();
-            refreshUsers();
-        });
+    private void checkPendingAccessRequests() {
+        try {
+            UI ui = getUI().orElseThrow(UIInaccessibleException::new);
+            ui.access(() -> {
+                Set<AccessRequest> accessRequests =
+                        accessRequestService.getPendingAccessRequestsOfChatRoomOwner(session.getSessionId());
+                accessRequests.forEach(accessRequest -> new ReceivedAccessRequestDialog(
+                        accessRequest,
+                        this::processAccessRequest
+                ));
+            });
+        } catch (RequestUnsuccessfulException e) {
+        }
     }
 
     private void refreshSessionData() {
@@ -376,20 +394,15 @@ public class CommunicatorView extends HorizontalLayout {
         usersGrid.setItems(members);
     }
 
-    private void refreshMessages() {
-        ChatRoomTab tab = chatRoomsTabs.getSelectedTab();
-        if (tab != null) {
-            List<Message> newMessages = messageService.getNewMessagesOfChatRoom(
-                    session.getSessionId(),
-                    tab.getChatRoom()
-            );
-            if (!newMessages.isEmpty()) {
-                UI ui = getUI().orElseThrow(RuntimeException::new);
-                ui.access(() -> tabsToChatRooms.get(tab).add(newMessages.stream()
-                        .map(MessageComponent::new)
-                        .collect(Collectors.toList())
-                ));
-            }
+    private void checkProcessedAccessRequests() {
+        try {
+            UI ui = getUI().orElseThrow(UIInaccessibleException::new);
+            ui.access(() -> {
+                Set<AccessRequest> accessRequests =
+                        accessRequestService.getProcessedAccessRequestOfSender(session.getSessionId());
+                accessRequests.forEach(ProcessedAccessRequestNotification::new);
+            });
+        } catch (RequestUnsuccessfulException e) {
         }
     }
 
