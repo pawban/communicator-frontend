@@ -36,6 +36,7 @@ public class UserDeleteConfirmDialog extends Dialog {
 
         add(mainLayout);
         setWidth("500px");
+        open();
     }
 
 }

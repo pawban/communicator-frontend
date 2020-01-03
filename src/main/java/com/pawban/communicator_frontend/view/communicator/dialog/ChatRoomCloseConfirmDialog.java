@@ -36,6 +36,7 @@ public class ChatRoomCloseConfirmDialog extends Dialog {
 
         add(mainLayout);
         setWidth("500px");
+        open();
     }
 
 }

@@ -67,6 +67,8 @@ public class NewChatRoomDialog extends Dialog {
                 this.close();
             }
         });
+
+        open();
     }
 
     @Getter

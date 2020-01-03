@@ -36,6 +36,7 @@ public class ChatRoomDeleteConfirmDialog extends Dialog {
 
         add(mainLayout);
         setWidth("500px");
+        open();
     }
 
 }

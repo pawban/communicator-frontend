@@ -52,6 +52,7 @@ public class ReceivedAccessRequestDialog extends Dialog {
         setWidth("500px");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
+        open();
     }
 
 }

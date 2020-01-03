@@ -119,18 +119,14 @@ public class CommunicatorView extends HorizontalLayout {
         visibilityIcon = new VisibilityIcon(session.getUser().getVisible());
         refreshChatRooms();
         refreshUsers();
-        deleteUserIcon.addClickListener(
-                iconClickEvent -> new UserDeleteConfirmDialog(this::deleteCurrentUser).open()
-        );
+        deleteUserIcon.addClickListener(iconClickEvent -> new UserDeleteConfirmDialog(this::deleteCurrentUser));
         leaveChatRoomIcon.addClickListener(iconClickEvent -> new ChatRoomCloseConfirmDialog(
-                        () -> removeCurrentUserFromChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
-                ).open()
-        );
+                () -> removeCurrentUserFromChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
+        ));
         deleteChatRoomIcon.addClickListener(iconClickEvent -> new ChatRoomDeleteConfirmDialog(
-                        () -> deleteChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
-                ).open()
-        );
-        createNewChatRoomIcon.addClickListener(iconClickEvent -> new NewChatRoomDialog(this::createNewChatRoom).open());
+                () -> deleteChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
+        ));
+        createNewChatRoomIcon.addClickListener(iconClickEvent -> new NewChatRoomDialog(this::createNewChatRoom));
         messageInput.addKeyDownListener(Key.ENTER, keyPressEvent -> sendMessageButton.click());
         sendMessageButton.addClickListener(buttonClickEvent -> sendMessage());
 

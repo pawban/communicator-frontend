@@ -91,7 +91,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
                 icon = VaadinIcon.MINUS_CIRCLE.create();
                 icon.getElement().setAttribute("title", "Leave this chat room");
                 icon.addClickListener(iconClickEvent ->
-                        new ChatRoomCloseConfirmDialog(() -> leaveChatRoomAction.accept(chatRoom)).open()
+                        new ChatRoomCloseConfirmDialog(() -> leaveChatRoomAction.accept(chatRoom))
                 );
                 break;
             case OWNER:
