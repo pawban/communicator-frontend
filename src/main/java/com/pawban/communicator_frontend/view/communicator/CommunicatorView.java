@@ -227,20 +227,9 @@ public class CommunicatorView extends HorizontalLayout {
         this.session.setChatRooms(userService.getCurrentUserChatRooms(session.getSessionId()));
     }
 
-    private void refreshChatRooms() {
-        List<ChatRoom> availableChatRooms = chatRoomService.getAvailableChatRooms(session.getSessionId());
-        chatRoomsGrid.setItems(availableChatRooms);
-        Set<UUID> chatRoomsIds = availableChatRooms.stream()
-                .map(ChatRoom::getId)
-                .collect(Collectors.toSet());
-        chatRoomsTabs.getDisplayedChatRooms().forEach(chatRoom -> {
-            if (!chatRoomsIds.contains(chatRoom.getId())) {
-                removeChatRoomFromView(chatRoom);
-            }
-        });
-        session.getChatRooms().stream()
-                .filter(chatRoomsTabs::isNotDisplayed)
-                .forEach(this::addChatRoomToView);
+    private void cancelPendingAccessRequestTask() {
+        checkPendingAccessRequestsTask.cancel(true);
+        checkPendingAccessRequestsTask = null;
     }
 
     private void removeChatRoomFromView(ChatRoom chatRoom) {
@@ -416,6 +405,25 @@ public class CommunicatorView extends HorizontalLayout {
             }
         }
         usersGrid.setItems(members);
+    }
+
+    private void sendAccessRequest(final UUID chatRoomId,
+                                   final String request) {
+        try {
+            pendingAccessRequests.add(
+                    accessRequestService.createAccessRequest(session.getSessionId(), chatRoomId, request)
+            );
+            if (checkPendingAccessRequestsTask == null) {
+                checkPendingAccessRequestsTask = taskScheduler.scheduleAtFixedRate(
+                        this::checkProcessedAccessRequests,
+                        java.util.Date.from(Instant.now().plusMillis(5000L)),
+                        5000L
+                );
+            }
+            new CustomNotification("Access request has been sent.");
+        } catch (RequestUnsuccessfulException e) {
+            new ErrorDialog("Sending access request has failed.");
+        }
     }
 
     private void checkProcessedAccessRequests() {
