@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -31,6 +32,23 @@ public class AccessRequest {
                 accessRequestDto.getRequest(),
                 accessRequestDto.getStatus()
         );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AccessRequest that = (AccessRequest) o;
+        return id.equals(that.id);
     }
 
 }

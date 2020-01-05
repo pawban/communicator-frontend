@@ -43,6 +43,7 @@ import com.pawban.communicator_frontend.view.communicator.dialog.CustomNotificat
 import com.pawban.communicator_frontend.view.communicator.dialog.ErrorDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewAccessRequestDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewChatRoomDialog;
+import com.pawban.communicator_frontend.view.communicator.dialog.ProcessedAccessRequestNotification;
 import com.pawban.communicator_frontend.view.communicator.dialog.ReceivedAccessRequestDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.UserDeleteConfirmDialog;
 import com.pawban.communicator_frontend.view.newuser.NewUserView;
@@ -96,6 +97,8 @@ public class CommunicatorView extends HorizontalLayout {
 
     private final AtomicReference<ChatRoomMessagesDiv> currentChatRoom = new AtomicReference<>();
     private final Map<ChatRoomTab, ChatRoomMessagesDiv> tabsToChatRooms = new HashMap<>();
+    private final Set<AccessRequest> pendingAccessRequests = new HashSet<>();
+    private ScheduledFuture<?> checkPendingAccessRequestsTask;
 
     public CommunicatorView(@Autowired final CommunicatorSession session,
                             @Autowired final UserService userService,
@@ -160,6 +163,9 @@ public class CommunicatorView extends HorizontalLayout {
     private void unregisterSchedulerTasks() {
         scheduledFutures.forEach(task -> task.cancel(true));
         scheduledFutures.clear();
+        if (checkPendingAccessRequestsTask != null) {
+            cancelPendingAccessRequestTask();
+        }
     }
 
     private void refreshView() {
@@ -319,14 +325,22 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void sendAccessRequest(final UUID chatRoomId,
-                                   final String request) {
-        try {
-            accessRequestService.createAccessRequest(session.getSessionId(), chatRoomId, request);
-            new CustomNotification("Access request has been sent.");
-        } catch (RequestUnsuccessfulException e) {
-            new ErrorDialog("Sending access request has failed.");
-        }
+    private void refreshChatRooms() {
+        List<ChatRoom> availableChatRooms = chatRoomService.getAvailableChatRooms(session.getSessionId());
+        chatRoomsGrid.setItems(availableChatRooms);
+        Map<UUID, ChatRoom> availableChatRoomsIds = availableChatRooms.stream()
+                .collect(Collectors.toMap(ChatRoom::getId, chatRoom -> chatRoom));
+        chatRoomsTabs.getDisplayedChatRooms().forEach(chatRoom -> {
+            if (!availableChatRoomsIds.containsKey(chatRoom.getId())) {
+                removeChatRoomFromView(chatRoom);
+            } else {
+                chatRoom.setOwner(availableChatRoomsIds.get(chatRoom.getId()).getOwner());
+            }
+        });
+        changeTab();
+        session.getChatRooms().stream()
+                .filter(chatRoomsTabs::isNotDisplayed)
+                .forEach(this::addChatRoomToView);
     }
 
     private void deleteChatRoom(final ChatRoom chatRoom) {
@@ -405,14 +419,19 @@ public class CommunicatorView extends HorizontalLayout {
     }
 
     private void checkProcessedAccessRequests() {
-        try {
-            UI ui = getUI().orElseThrow(UIInaccessibleException::new);
-            ui.access(() -> {
-                Set<AccessRequest> accessRequests =
-                        accessRequestService.getProcessedAccessRequestOfSender(session.getSessionId());
-                accessRequests.forEach(ProcessedAccessRequestNotification::new);
-            });
-        } catch (RequestUnsuccessfulException e) {
+        Set<AccessRequest> accessRequests = accessRequestService.getProcessedAccessRequestOfSender(session.getSessionId());
+        if (!accessRequests.isEmpty()) {
+            try {
+                UI ui = getUI().orElseThrow(UIInaccessibleException::new);
+                ui.access(() -> accessRequests.forEach(accessRequest -> {
+                    pendingAccessRequests.removeIf(ar -> ar.equals(accessRequest));
+                    if (pendingAccessRequests.isEmpty()) {
+                        cancelPendingAccessRequestTask();
+                    }
+                    new ProcessedAccessRequestNotification(accessRequest);
+                }));
+            } catch (RequestUnsuccessfulException e) {
+            }
         }
     }
 
