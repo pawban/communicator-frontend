@@ -352,7 +352,10 @@ public class CommunicatorView extends HorizontalLayout {
         changeTab();
         session.getChatRooms().stream()
                 .filter(chatRoomsTabs::isNotDisplayed)
-                .forEach(this::addChatRoomToView);
+                .forEach(chatRoom -> {
+                    addChatRoomToView(chatRoom);
+                    new CustomNotification("You've been added to chat room '" + chatRoom.getName() + "'.");
+                });
     }
 
     private void deleteChatRoom(final ChatRoom chatRoom) {

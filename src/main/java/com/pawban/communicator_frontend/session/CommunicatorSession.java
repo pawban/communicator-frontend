@@ -20,10 +20,10 @@ import java.util.UUID;
 @Setter
 public class CommunicatorSession {
 
+    private final Set<ChatRoom> chatRooms = new HashSet<>();
     private UUID sessionId;
     private User currentUser;
     private UUID currentChatRoomId;
-    private Set<ChatRoom> chatRooms = new HashSet<>();
 
     public void setSession(final SessionData session) {
         this.sessionId = session.getSessionId();
