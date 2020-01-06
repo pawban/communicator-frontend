@@ -449,7 +449,7 @@ public class CommunicatorView extends HorizontalLayout {
             unregisterSchedulerTasks();
             RouteConfiguration configuration = RouteConfiguration.forSessionScope();
             configuration.removeRoute("");
-            configuration.setRoute("", NewUserView.class, MainLayout.class);
+            configuration.setRoute("", NewUserView.class, Collections.singletonList(MainLayout.class));
             UI.getCurrent().getPage().reload();
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Deletion of current user has failed.");
