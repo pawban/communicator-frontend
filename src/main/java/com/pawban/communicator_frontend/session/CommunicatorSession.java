@@ -30,9 +30,9 @@ public class CommunicatorSession {
         this.currentUser = session.getUser();
     }
 
-    public boolean isCurrentUserMemberOf(final UUID chatRoomId) {
+    public boolean isCurrentUserMemberOf(final ChatRoom chatRoom) {
         return chatRooms.stream()
-                .anyMatch(chatRoom -> chatRoom.getId().equals(chatRoomId));
+                .anyMatch(cr -> cr.equals(chatRoom));
     }
 
     public boolean isCurrentUserOwnerOf(final ChatRoom chatRoom) {
@@ -41,7 +41,7 @@ public class CommunicatorSession {
 
     public Optional<ChatRoom> getChatRoom(final UUID chatRoomId) {
         return chatRooms.stream()
-                .filter(room -> room.getId().equals(chatRoomId))
+                .filter(cr -> cr.getId().equals(chatRoomId))
                 .findFirst();
     }
 

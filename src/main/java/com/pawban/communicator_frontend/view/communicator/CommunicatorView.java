@@ -256,10 +256,10 @@ public class CommunicatorView extends HorizontalLayout {
     }
 
     private void removeChatRoomFromView(ChatRoom chatRoom) {
-        session.getChatRooms().removeIf(cr -> cr.getId().equals(chatRoom.getId()));
+        session.getChatRooms().removeIf(cr -> cr.equals(chatRoom));
         chatRoomsGrid.setItems(chatRoomService.getAvailableChatRooms(session.getSessionId()));
         if (chatRoomsTabs.getSelectedTab() != null &&
-                chatRoomsTabs.getSelectedTab().getChatRoomId().equals(chatRoom.getId())) {
+                chatRoomsTabs.getSelectedTab().getChatRoom().equals(chatRoom)) {
             chatRoomsTabs.setSelectedTab(null);
             currentChatRoom.set(null);
             if (session.isCurrentUserOwnerOf(chatRoom)) {
@@ -287,7 +287,7 @@ public class CommunicatorView extends HorizontalLayout {
     // helper methods
     private boolean exists(final ChatRoom chatRoom) {
         return tabsToChatRooms.keySet().stream()
-                .anyMatch(tab -> tab.getChatRoomId().equals(chatRoom.getId()));
+                .anyMatch(tab -> tab.getChatRoom().equals(chatRoom));
     }
 
     private void sendMessage() {
@@ -425,7 +425,7 @@ public class CommunicatorView extends HorizontalLayout {
                     selectedTab.getChatRoomId()
             ));
             usersGrid.setChatRoom(selectedTab.getChatRoom());
-            if (selectedTab.getChatRoom().getOwner().getId().equals(session.getCurrentUser().getId())) {
+            if (selectedTab.getChatRoom().getOwner().equals(session.getCurrentUser())) {
                 usersGrid.addButtonsColumn();
             } else {
                 usersGrid.removeButtonsColumn();

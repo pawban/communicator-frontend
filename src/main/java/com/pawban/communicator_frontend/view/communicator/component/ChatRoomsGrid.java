@@ -118,10 +118,10 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
     }
 
     private MembershipRole getCurrentUserRole(final ChatRoom chatRoom) {
-        if (chatRoom.getOwner().getId().equals(session.getCurrentUser().getId())) {
+        if (chatRoom.getOwner().equals(session.getCurrentUser())) {
             return MembershipRole.OWNER;
         }
-        return session.getChatRooms().stream().anyMatch(cr -> cr.getId().equals(chatRoom.getId())) ?
+        return session.getChatRooms().stream().anyMatch(cr -> cr.equals(chatRoom)) ?
                 MembershipRole.MEMBER :
                 MembershipRole.OUTSIDER;
     }
