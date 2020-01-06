@@ -74,7 +74,7 @@ import java.util.stream.Collectors;
 public class CommunicatorView extends HorizontalLayout {
 
     private final TaskScheduler taskScheduler;
-    private final Set<ScheduledFuture> scheduledFutures = new HashSet<>();
+    private final Set<ScheduledFuture<?>> scheduledFutures = new HashSet<>();
 
     private final CommunicatorSession session;
     private final UserService userService;
