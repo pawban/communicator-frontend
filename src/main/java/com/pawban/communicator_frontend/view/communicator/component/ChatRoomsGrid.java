@@ -114,7 +114,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
                         "New access request is required to rejoin this chat room.",
                 "Leave chat room",
                 () -> leaveChatRoomAction.accept(chatRoom)
-        );
+        ).open();
     }
 
     private MembershipRole getCurrentUserRole(final ChatRoom chatRoom) {

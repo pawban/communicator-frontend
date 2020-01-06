@@ -39,7 +39,6 @@ public class ConfirmDialog extends Dialog {
 
         add(mainLayout);
         setWidth("500px");
-        open();
     }
 
 }

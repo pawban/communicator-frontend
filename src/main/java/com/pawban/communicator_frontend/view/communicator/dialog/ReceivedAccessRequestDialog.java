@@ -50,7 +50,6 @@ public class ReceivedAccessRequestDialog extends CustomizedDialog {
         add(infoLabel, requestLabel);
         setWidth("500px");
         setCloseOnEsc(false);
-        open();
     }
 
 }

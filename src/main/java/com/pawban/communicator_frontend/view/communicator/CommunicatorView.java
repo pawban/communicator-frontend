@@ -125,7 +125,7 @@ public class CommunicatorView extends HorizontalLayout {
         deleteUserIcon.addClickListener(iconClickEvent -> openDeleteUserConfirmDialog());
         leaveChatRoomIcon.addClickListener(iconClickEvent -> openLeaveChatRoomConfirmDialog());
         deleteChatRoomIcon.addClickListener(iconClickEvent -> openDeleteChatRoomConfirmDialog());
-        createNewChatRoomIcon.addClickListener(iconClickEvent -> new NewChatRoomDialog(this::createNewChatRoom));
+        createNewChatRoomIcon.addClickListener(iconClickEvent -> new NewChatRoomDialog(this::createNewChatRoom).open());
         messageInput.addKeyDownListener(Key.ENTER, keyPressEvent -> sendMessageButton.click());
         sendMessageButton.addClickListener(buttonClickEvent -> sendMessage());
 
@@ -239,7 +239,7 @@ public class CommunicatorView extends HorizontalLayout {
                 accessRequests.forEach(accessRequest -> new ReceivedAccessRequestDialog(
                         accessRequest,
                         this::processAccessRequest
-                ));
+                ).open());
             });
         } catch (RequestUnsuccessfulException ignored) {
         }

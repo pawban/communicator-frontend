@@ -56,8 +56,6 @@ public class NewChatRoomDialog extends CustomizedDialog {
                 close();
             }
         });
-
-        open();
     }
 
 }
