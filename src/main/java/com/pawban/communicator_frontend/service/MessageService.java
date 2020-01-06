@@ -26,8 +26,8 @@ public class MessageService {
 
     public boolean sendNewMessage(final UUID sessionId,
                                   final String messageText,
-                                  final UUID chatRoomId) {
-        return messageClient.createMessage(sessionId, messageText, chatRoomId).isPresent();
+                                  final ChatRoom chatRoom) {
+        return messageClient.createMessage(sessionId, messageText, chatRoom.getId()).isPresent();
     }
 
 }
