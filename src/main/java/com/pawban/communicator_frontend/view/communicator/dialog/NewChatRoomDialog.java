@@ -15,7 +15,12 @@ import lombok.Setter;
 
 import java.util.function.BiConsumer;
 
-public class NewChatRoomDialog extends Dialog {
+@Getter
+@Setter
+public class NewChatRoomDialog extends CustomizedDialog {
+
+    private String newChatRoomName;
+    private ChatRoomStatus newChatRoomStatus;
 
     public NewChatRoomDialog(BiConsumer<String, ChatRoomStatus> clickAction) {
         H4 title = new H4("New chat room");
@@ -50,34 +55,23 @@ public class NewChatRoomDialog extends Dialog {
         add(mainLayout);
         setWidth("350px");
 
-        Binder<NewChatRoom> binder = new Binder<>(NewChatRoom.class);
-        NewChatRoom newChatRoom = new NewChatRoom();
-        binder.setBean(newChatRoom);
-
+        Binder<NewChatRoomDialog> binder = new Binder<>(NewChatRoomDialog.class);
+        binder.setBean(this);
         binder.forField(nameField)
                 .asRequired("Chat room name can't be empty.")
-                .bind("name");
+                .bind("newChatRoomName");
         binder.forField(statusComboBox)
                 .asRequired("You have to choose chat room status.")
-                .bind("status");
+                .bind("newChatRoomStatus");
 
         createButton.addClickListener(buttonClickEvent -> {
             if (binder.validate().isOk()) {
-                clickAction.accept(newChatRoom.getName(), newChatRoom.getStatus());
-                this.close();
+                clickAction.accept(newChatRoomName, newChatRoomStatus);
+                close();
             }
         });
 
         open();
-    }
-
-    @Getter
-    @Setter
-    public class NewChatRoom {
-
-        private String name;
-        private ChatRoomStatus status;
-
     }
 
 }
