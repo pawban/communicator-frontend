@@ -438,7 +438,7 @@ public class CommunicatorView extends HorizontalLayout {
                     }
                     new ProcessedAccessRequestNotification(accessRequest);
                 }));
-            } catch (RequestUnsuccessfulException e) {
+            } catch (RequestUnsuccessfulException ignored) {
             }
         }
     }
