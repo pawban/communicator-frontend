@@ -247,7 +247,7 @@ public class CommunicatorView extends HorizontalLayout {
 
     private void refreshSessionData() {
         this.session.setSession(userService.getSessionData(session.getSessionId()));
-        this.session.setChatRooms(userService.getCurrentUserChatRooms(session.getSessionId()));
+        this.session.getChatRooms().addAll(userService.getCurrentUserChatRooms(session.getSessionId()));
     }
 
     private void cancelPendingAccessRequestTask() {
