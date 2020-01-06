@@ -11,12 +11,16 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class ChangeChatRoomOwnerDialog extends Dialog {
+@Getter
+@Setter
+public class ChangeChatRoomOwnerDialog extends CustomizedDialog {
 
     private User chosenUser;
 
@@ -56,10 +60,10 @@ public class ChangeChatRoomOwnerDialog extends Dialog {
                 .asRequired("You have to choose new owner of chat room.")
                 .bind("chosenUser");
 
-        sendButton.addClickListener(buttonClickEvent -> {
+        setOkButtonClickListener(buttonClickEvent -> {
             if (binder.validate().isOk()) {
                 changeOwnerAction.accept(chatRoom, chosenUser);
-                this.close();
+                close();
             }
         });
     }
