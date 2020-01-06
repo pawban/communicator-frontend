@@ -19,7 +19,7 @@ public class ChatRoomsTabs extends Tabs {
     }
 
     public void add(final ChatRoomTab tab) {
-        tabs.put(tab.getChatRoomId(), tab);
+        tabs.put(tab.getChatRoom().getId(), tab);
         super.add(tab);
     }
 
