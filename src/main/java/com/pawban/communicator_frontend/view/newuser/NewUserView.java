@@ -24,6 +24,8 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
+
 @Route(
         value = "",
         layout = MainLayout.class
@@ -107,7 +109,7 @@ public class NewUserView extends VerticalLayout {
         this.session.setSession(sessionData);
         RouteConfiguration configuration = RouteConfiguration.forSessionScope();
         configuration.removeRoute("");
-        configuration.setRoute("", CommunicatorView.class, MainLayout.class);
+        configuration.setRoute("", CommunicatorView.class, Collections.singletonList(MainLayout.class));
         UI.getCurrent().getPage().reload();
     }
 
