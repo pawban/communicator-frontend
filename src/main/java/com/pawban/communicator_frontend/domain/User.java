@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -23,6 +24,23 @@ public class User {
 
     public User(final UserDto userDto) {
         this(userDto.getId(), userDto.getUsername(), new Country(userDto.getCountry()), userDto.getVisible());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return id.equals(user.id);
     }
 
 }
