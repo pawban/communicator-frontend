@@ -7,13 +7,12 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class ReceivedAccessRequestDialog extends CustomizedDialog {
 
     public ReceivedAccessRequestDialog(final AccessRequest accessRequest,
-                                       final BiConsumer<UUID, Boolean> clickAction) {
+                                       final BiConsumer<AccessRequest, Boolean> clickAction) {
         super("You have received new access request");
         setOkButtonText("Accept");
         setOkButtonThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
@@ -38,12 +37,12 @@ public class ReceivedAccessRequestDialog extends CustomizedDialog {
         requestLabel.getStyle().set("font-style", "italic");
 
         setCancelButtonClickListener(buttonClickEvent -> {
-            clickAction.accept(accessRequest.getId(), false);
+            clickAction.accept(accessRequest, false);
             close();
         });
 
         setOkButtonClickListener(buttonClickEvent -> {
-            clickAction.accept(accessRequest.getId(), true);
+            clickAction.accept(accessRequest, true);
             this.close();
         });
 

@@ -217,13 +217,13 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void processAccessRequest(final UUID accessRequestId,
+    private void processAccessRequest(final AccessRequest accessRequest,
                                       @NotNull final Boolean accepted) {
         try {
             if (accepted) {
-                accessRequestService.acceptAccessRequest(session.getSessionId(), accessRequestId);
+                accessRequestService.acceptAccessRequest(session.getSessionId(), accessRequest);
             } else {
-                accessRequestService.rejectAccessRequest(session.getSessionId(), accessRequestId);
+                accessRequestService.rejectAccessRequest(session.getSessionId(), accessRequest);
             }
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Processing of access request has failed.");
@@ -294,7 +294,7 @@ public class CommunicatorView extends HorizontalLayout {
         if (messageService.sendNewMessage(
                 session.getSessionId(),
                 messageInput.getValue(),
-                chatRoomsTabs.getSelectedTab().getChatRoomId()
+                chatRoomsTabs.getSelectedTab().getChatRoom()
         )) {
             messageInput.clear();
         } else {
@@ -305,7 +305,7 @@ public class CommunicatorView extends HorizontalLayout {
     private void changeStatusOfTheChatRoom(final ChatRoom chatRoom,
                                            final ChatRoomStatus newStatus) {
         try {
-            chatRoomService.changeChatRoomStatus(session.getSessionId(), chatRoom.getId(), newStatus);
+            chatRoomService.changeChatRoomStatus(session.getSessionId(), chatRoom, newStatus);
             refreshChatRooms();
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Changing chat room status has failed.");
@@ -314,7 +314,7 @@ public class CommunicatorView extends HorizontalLayout {
 
     private List<User> getMembersOfChatRoomExcludingCurrentUser(final ChatRoom chatRoom) {
         try {
-            List<Member> members = chatRoomService.getChatRoomMembers(session.getSessionId(), chatRoom.getId());
+            List<Member> members = chatRoomService.getChatRoomMembers(session.getSessionId(), chatRoom);
             return members.stream()
                     .filter(member -> !member.getRole().equals(MembershipRole.OWNER))
                     .map(Member::getUser)
@@ -328,7 +328,7 @@ public class CommunicatorView extends HorizontalLayout {
     private void changeOwnerOfChatRoom(final ChatRoom chatRoom,
                                        final User newOwner) {
         try {
-            chatRoomService.changeChatRoomOwner(session.getSessionId(), chatRoom.getId(), newOwner.getId());
+            chatRoomService.changeChatRoomOwner(session.getSessionId(), chatRoom, newOwner);
             session.getChatRoom(chatRoom.getId()).ifPresent(cr -> cr.setOwner(newOwner));
             refreshChatRooms();
             refreshUsers();
@@ -361,7 +361,7 @@ public class CommunicatorView extends HorizontalLayout {
 
     private void deleteChatRoom(final ChatRoom chatRoom) {
         try {
-            chatRoomService.deleteChatRoom(session.getSessionId(), chatRoom.getId());
+            chatRoomService.deleteChatRoom(session.getSessionId(), chatRoom);
             removeChatRoomFromView(chatRoom);
             chatRoomsGrid.setItems(chatRoomService.getAvailableChatRooms(session.getSessionId()));
             new CustomNotification("Chat room has been deleted.");
@@ -385,14 +385,14 @@ public class CommunicatorView extends HorizontalLayout {
 
     private void removeCurrentUserFromChatRoom(final ChatRoom chatRoom) {
         removeChatRoomFromView(chatRoom);
-        removeMemberFromChatRoom(session.getCurrentUser().getId(), chatRoom);
+        removeMemberFromChatRoom(session.getCurrentUser(), chatRoom);
         chatRoomsGrid.setItems(chatRoomService.getAvailableChatRooms(session.getSessionId()));
     }
 
-    private void removeMemberFromChatRoom(final UUID memberId,
+    private void removeMemberFromChatRoom(final User member,
                                           @NotNull final ChatRoom chatRoom) {
         try {
-            chatRoomService.removeMemberFromChatRoom(session.getSessionId(), chatRoom.getId(), memberId);
+            chatRoomService.removeMemberFromChatRoom(session.getSessionId(), chatRoom, member);
             refreshSessionData();
             refreshUsers();
             new CustomNotification("User has been removed from the chat room.");
@@ -401,10 +401,10 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void addMemberToChatRoom(final UUID memberId,
+    private void addMemberToChatRoom(final User member,
                                      @NotNull final ChatRoom chatRoom) {
         try {
-            chatRoomService.addMemberToChatRoom(session.getSessionId(), chatRoom.getId(), memberId);
+            chatRoomService.addMemberToChatRoom(session.getSessionId(), chatRoom, member);
             refreshUsers();
             new CustomNotification("New member has been added to the chat room.");
         } catch (RequestUnsuccessfulException e) {
@@ -422,7 +422,7 @@ public class CommunicatorView extends HorizontalLayout {
         } else {
             members.addAll(chatRoomService.getChatRoomMembersWithPotentialMembers(
                     session.getSessionId(),
-                    selectedTab.getChatRoomId()
+                    selectedTab.getChatRoom()
             ));
             usersGrid.setChatRoom(selectedTab.getChatRoom());
             if (selectedTab.getChatRoom().getOwner().equals(session.getCurrentUser())) {
@@ -434,11 +434,11 @@ public class CommunicatorView extends HorizontalLayout {
         usersGrid.setItems(members);
     }
 
-    private void sendAccessRequest(final UUID chatRoomId,
+    private void sendAccessRequest(final ChatRoom chatRoom,
                                    final String request) {
         try {
             pendingAccessRequests.add(
-                    accessRequestService.createAccessRequest(session.getSessionId(), chatRoomId, request)
+                    accessRequestService.createAccessRequest(session.getSessionId(), chatRoom, request)
             );
             if (checkPendingAccessRequestsTask == null) {
                 checkPendingAccessRequestsTask = taskScheduler.scheduleAtFixedRate(

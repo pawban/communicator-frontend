@@ -4,6 +4,7 @@ import com.pawban.communicator_frontend.client.ChatRoomClient;
 import com.pawban.communicator_frontend.domain.ChatRoom;
 import com.pawban.communicator_frontend.domain.Member;
 import com.pawban.communicator_frontend.domain.Message;
+import com.pawban.communicator_frontend.domain.User;
 import com.pawban.communicator_frontend.exception.RequestUnsuccessfulException;
 import com.pawban.communicator_frontend.type.ChatRoomStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +28,18 @@ public class ChatRoomService {
     }
 
     public List<Member> getChatRoomMembers(final UUID sessionId,
-                                           final UUID chatRoomId) {
-        return chatRoomClient.getChatRoomMembers(sessionId, chatRoomId, false);
+                                           final ChatRoom chatRoom) {
+        return chatRoomClient.getChatRoomMembers(sessionId, chatRoom.getId(), false);
     }
 
     public List<Member> getChatRoomMembersWithPotentialMembers(final UUID sessionId,
-                                                               final UUID chatRoomId) {
-        return chatRoomClient.getChatRoomMembers(sessionId, chatRoomId, true);
+                                                               final ChatRoom chatRoom) {
+        return chatRoomClient.getChatRoomMembers(sessionId, chatRoom.getId(), true);
     }
 
     public List<Message> getNewChatRoomMessages(final UUID sessionId,
-                                                final UUID chatRoomId) {
-        return chatRoomClient.getChatRoomMessages(sessionId, chatRoomId, true);
+                                                final ChatRoom chatRoom) {
+        return chatRoomClient.getChatRoomMessages(sessionId, chatRoom.getId(), true);
     }
 
     public ChatRoom createChatRoom(final UUID sessionId,
@@ -52,60 +53,60 @@ public class ChatRoomService {
     }
 
     public ChatRoom changeChatRoomStatus(final UUID sessionId,
-                                         final UUID chatRoomId,
+                                         final ChatRoom chatRoom,
                                          final ChatRoomStatus status) {
-        return chatRoomClient.changeChatRoomStatus(sessionId, chatRoomId, status)
+        return chatRoomClient.changeChatRoomStatus(sessionId, chatRoom.getId(), status)
                 .orElseThrow(() -> new RequestUnsuccessfulException(
                         sessionId,
-                        "Unable to change the status of chat room with id = '" +
-                                chatRoomId.toString() + "'."
+                        "Unable to change the status of chat room with name '" +
+                                chatRoom.getName() + "'."
                 ));
     }
 
     public ChatRoom changeChatRoomOwner(final UUID sessionId,
-                                        final UUID chatRoomId,
-                                        final UUID newOwnerId) {
-        return chatRoomClient.changeChatRoomOwner(sessionId, chatRoomId, newOwnerId)
+                                        final ChatRoom chatRoom,
+                                        final User newOwner) {
+        return chatRoomClient.changeChatRoomOwner(sessionId, chatRoom.getId(), newOwner.getId())
                 .orElseThrow(() -> new RequestUnsuccessfulException(
                         sessionId,
-                        "Unable to pass the ownership of chat room with id = '" +
-                                chatRoomId.toString() + "' to user with id = '" +
-                                newOwnerId.toString() + "'."
+                        "Unable to pass the ownership of chat room with name '" +
+                                chatRoom.getName() + "' to user '" +
+                                newOwner.getUsername() + "'."
                 ));
     }
 
     public void addMemberToChatRoom(final UUID sessionId,
-                                    final UUID chatRoomId,
-                                    final UUID newMemberId) {
-        if (!chatRoomClient.addMemberToChatRoom(sessionId, chatRoomId, newMemberId)) {
+                                    final ChatRoom chatRoom,
+                                    final User newMember) {
+        if (!chatRoomClient.addMemberToChatRoom(sessionId, chatRoom.getId(), newMember.getId())) {
             throw new RequestUnsuccessfulException(
                     sessionId,
-                    "Unable to add member with id = '" +
-                            newMemberId.toString() + "' to chat room with id = '" +
-                            chatRoomId.toString() + "'."
+                    "Unable to add user '" +
+                            newMember.getUsername() + "' to members of chat room with name '" +
+                            chatRoom.getName() + "'."
             );
         }
     }
 
     public void deleteChatRoom(final UUID sessionId,
-                               final UUID chatRoomId) {
-        if (!chatRoomClient.deleteChatRoom(sessionId, chatRoomId)) {
+                               final ChatRoom chatRoom) {
+        if (!chatRoomClient.deleteChatRoom(sessionId, chatRoom.getId())) {
             throw new RequestUnsuccessfulException(
                     sessionId,
-                    "Unable to delete chat room with id = '" + chatRoomId.toString() + "'."
+                    "Unable to delete chat room with name '" + chatRoom.getName() + "'."
             );
         }
     }
 
     public void removeMemberFromChatRoom(final UUID sessionId,
-                                         final UUID chatRoomId,
-                                         final UUID memberId) {
-        if (!chatRoomClient.removeMemberFromChatRoom(sessionId, chatRoomId, memberId)) {
+                                         final ChatRoom chatRoom,
+                                         final User member) {
+        if (!chatRoomClient.removeMemberFromChatRoom(sessionId, chatRoom.getId(), member.getId())) {
             throw new RequestUnsuccessfulException(
                     sessionId,
-                    "Unable to remove member with id = '" +
-                            memberId.toString() + "' from chat room with id = '" +
-                            chatRoomId.toString() + "'."
+                    "Unable to remove user '" +
+                            member.getUsername() + "' from members of chat room with name = '" +
+                            chatRoom.getName() + "'."
             );
         }
     }

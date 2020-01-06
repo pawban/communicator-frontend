@@ -4,7 +4,6 @@ import com.pawban.communicator_frontend.domain.ChatRoom;
 import com.pawban.communicator_frontend.view.component.CustomizedDialog;
 import com.vaadin.flow.component.textfield.TextField;
 
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class NewAccessRequestDialog extends CustomizedDialog {
@@ -15,7 +14,7 @@ public class NewAccessRequestDialog extends CustomizedDialog {
 
     private ChatRoom chatRoom;
 
-    public NewAccessRequestDialog(final BiConsumer<UUID, String> sendAction) {
+    public NewAccessRequestDialog(final BiConsumer<ChatRoom, String> sendAction) {
         super("New access request");
         setOkButtonText("Send");
 
@@ -30,7 +29,7 @@ public class NewAccessRequestDialog extends CustomizedDialog {
 
         setOkButtonClickListener(buttonClickEvent -> {
             if (request.isValid()) {
-                sendAction.accept(chatRoom.getId(), request.getValue());
+                sendAction.accept(chatRoom, request.getValue());
                 close();
             }
         });

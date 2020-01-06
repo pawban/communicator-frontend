@@ -2,6 +2,7 @@ package com.pawban.communicator_frontend.view.communicator.component;
 
 import com.pawban.communicator_frontend.domain.ChatRoom;
 import com.pawban.communicator_frontend.domain.Member;
+import com.pawban.communicator_frontend.domain.User;
 import com.pawban.communicator_frontend.type.MembershipRole;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -11,7 +12,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class UsersGrid extends Grid<Member> {
@@ -19,14 +19,14 @@ public class UsersGrid extends Grid<Member> {
     private final String BUTTONS_COLUMN_KEY = "buttonsColumn";
 
     private final Icon emptyIcon = new Icon();
-    private final BiConsumer<UUID, ChatRoom> addMemberAction;
-    private final BiConsumer<UUID, ChatRoom> removeMemberAction;
+    private final BiConsumer<User, ChatRoom> addMemberAction;
+    private final BiConsumer<User, ChatRoom> removeMemberAction;
 
     private ChatRoom chatRoom;
     private boolean buttonsColumnPresent = false;
 
-    public UsersGrid(final BiConsumer<UUID, ChatRoom> addMemberAction,
-                     final BiConsumer<UUID, ChatRoom> removeMemberAction) {
+    public UsersGrid(final BiConsumer<User, ChatRoom> addMemberAction,
+                     final BiConsumer<User, ChatRoom> removeMemberAction) {
         this.addMemberAction = addMemberAction;
         this.removeMemberAction = removeMemberAction;
 
@@ -75,7 +75,7 @@ public class UsersGrid extends Grid<Member> {
                 iconPlus.getStyle().set("cursor", "pointer");
                 iconPlus.setSize("16px");
                 iconPlus.addClickListener(iconClickEvent -> addMemberAction.accept(
-                        member.getUser().getId(),
+                        member.getUser(),
                         Objects.requireNonNull(chatRoom)
                 ));
                 return iconPlus;
@@ -85,7 +85,7 @@ public class UsersGrid extends Grid<Member> {
                 iconMinus.getStyle().set("cursor", "pointer");
                 iconMinus.setSize("16px");
                 iconMinus.addClickListener(iconClickEvent -> removeMemberAction.accept(
-                        member.getUser().getId(),
+                        member.getUser(),
                         Objects.requireNonNull(chatRoom)
                 ));
                 return iconMinus;
