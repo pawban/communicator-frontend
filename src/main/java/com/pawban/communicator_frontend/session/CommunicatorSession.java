@@ -21,13 +21,13 @@ import java.util.UUID;
 public class CommunicatorSession {
 
     private UUID sessionId;
-    private User user;
+    private User currentUser;
     private UUID currentChatRoomId;
     private Set<ChatRoom> chatRooms = new HashSet<>();
 
     public void setSession(final SessionData session) {
         this.sessionId = session.getSessionId();
-        this.user = session.getUser();
+        this.currentUser = session.getUser();
     }
 
     public boolean isCurrentUserMemberOf(final UUID chatRoomId) {
@@ -36,7 +36,7 @@ public class CommunicatorSession {
     }
 
     public boolean isCurrentUserOwnerOf(final ChatRoom chatRoom) {
-        return chatRoom.getOwner().getId().equals(user.getId());
+        return chatRoom.getOwner().equals(currentUser);
     }
 
     public Optional<ChatRoom> getChatRoom(final UUID chatRoomId) {

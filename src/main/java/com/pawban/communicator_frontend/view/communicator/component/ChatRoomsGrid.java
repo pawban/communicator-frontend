@@ -44,7 +44,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
         this.changeChatRoomStatusAction = changeChatRoomStatusAction;
         this.usersSupplier = usersSupplier;
 
-        this.dialog.setSenderName(session.getUser().getUsername());
+        this.dialog.setSenderName(session.getCurrentUser().getUsername());
         addThemeVariants(GridVariant.LUMO_COMPACT);
 
         setSelectionMode(SelectionMode.NONE);
@@ -118,7 +118,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
     }
 
     private MembershipRole getCurrentUserRole(final ChatRoom chatRoom) {
-        if (chatRoom.getOwner().getId().equals(session.getUser().getId())) {
+        if (chatRoom.getOwner().getId().equals(session.getCurrentUser().getId())) {
             return MembershipRole.OWNER;
         }
         return session.getChatRooms().stream().anyMatch(cr -> cr.getId().equals(chatRoom.getId())) ?

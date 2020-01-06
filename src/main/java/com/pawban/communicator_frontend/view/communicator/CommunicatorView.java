@@ -119,7 +119,7 @@ public class CommunicatorView extends HorizontalLayout {
                 this::changeStatusOfTheChatRoom,
                 this::getMembersOfChatRoomExcludingCurrentUser
         );
-        visibilityIcon = new VisibilityIcon(session.getUser().getVisible());
+        visibilityIcon = new VisibilityIcon(session.getCurrentUser().getVisible());
         refreshChatRooms();
         refreshUsers();
         deleteUserIcon.addClickListener(iconClickEvent -> openDeleteUserConfirmDialog());
@@ -381,7 +381,7 @@ public class CommunicatorView extends HorizontalLayout {
 
     private void removeCurrentUserFromChatRoom(final ChatRoom chatRoom) {
         removeChatRoomFromView(chatRoom);
-        removeMemberFromChatRoom(session.getUser().getId(), chatRoom);
+        removeMemberFromChatRoom(session.getCurrentUser().getId(), chatRoom);
         chatRoomsGrid.setItems(chatRoomService.getAvailableChatRooms(session.getSessionId()));
     }
 
@@ -421,7 +421,7 @@ public class CommunicatorView extends HorizontalLayout {
                     selectedTab.getChatRoomId()
             ));
             usersGrid.setChatRoom(selectedTab.getChatRoom());
-            if (selectedTab.getChatRoom().getOwner().getId().equals(session.getUser().getId())) {
+            if (selectedTab.getChatRoom().getOwner().getId().equals(session.getCurrentUser().getId())) {
                 usersGrid.addButtonsColumn();
             } else {
                 usersGrid.removeButtonsColumn();
@@ -492,7 +492,7 @@ public class CommunicatorView extends HorizontalLayout {
     }
 
     private LeftPanel buildLeftPanel() {
-        LeftPanel leftPanel = new LeftPanel(buildHeader(session.getUser()),
+        LeftPanel leftPanel = new LeftPanel(buildHeader(session.getCurrentUser()),
                 buildTabsLayout(),
                 chatRoomMessagesPanel,
                 buildEnterMessagePanel()
@@ -533,9 +533,9 @@ public class CommunicatorView extends HorizontalLayout {
 
     private void changeCurrentUserVisibility() {
         try {
-            session.setUser(userService.changeCurrentUserVisibility(
+            session.setCurrentUser(userService.changeCurrentUserVisibility(
                     session.getSessionId(),
-                    !session.getUser().getVisible()
+                    !session.getCurrentUser().getVisible()
             ));
             visibilityIcon.toggleVisibility();
         } catch (RequestUnsuccessfulException e) {
