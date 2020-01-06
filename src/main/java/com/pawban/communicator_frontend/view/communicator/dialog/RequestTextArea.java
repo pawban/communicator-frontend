@@ -10,7 +10,7 @@ public class RequestTextArea extends TextArea {
     public RequestTextArea() {
         setLabel("Request");
         setPlaceholder("Enter a few words to convince chat room owner to accept your access request...");
-        setWidth("400px");
+        setWidthFull();
         setHeight("200px");
         setMaxLength(2000);
         setRequired(true);

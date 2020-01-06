@@ -2,13 +2,8 @@ package com.pawban.communicator_frontend.view.communicator.dialog;
 
 import com.pawban.communicator_frontend.domain.ChatRoom;
 import com.pawban.communicator_frontend.domain.User;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.pawban.communicator_frontend.view.component.CustomizedDialog;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
@@ -27,8 +22,8 @@ public class ChangeChatRoomOwnerDialog extends CustomizedDialog {
     public ChangeChatRoomOwnerDialog(final ChatRoom chatRoom,
                                      final Function<ChatRoom, List<User>> usersSupplier,
                                      final BiConsumer<ChatRoom, User> changeOwnerAction) {
-        H4 title = new H4("Change chat room owner");
-        title.getStyle().set("margin", "auto");
+        super("Change owner of the chat room");
+        setOkButtonText("Pass ownership");
 
         TextField chatRoomNameField = new TextField("Chat room name");
         chatRoomNameField.setReadOnly(true);
@@ -40,19 +35,10 @@ public class ChangeChatRoomOwnerDialog extends CustomizedDialog {
         userComboBox.setItemLabelGenerator(User::getUsername);
         userComboBox.setRequired(true);
         userComboBox.setItems(usersSupplier.apply(chatRoom));
+        userComboBox.focus();
+        userComboBox.setTabIndex(1);
 
-        Button cancelButton = new Button("Cancel");
-        cancelButton.addClickListener(buttonClickEvent -> this.close());
-
-        Button sendButton = new Button("Send");
-        sendButton.getStyle().set("margin-left", "auto");
-        sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        HorizontalLayout buttons = new HorizontalLayout(cancelButton, sendButton);
-        buttons.setWidthFull();
-
-        VerticalLayout mainLayout = new VerticalLayout(title, chatRoomNameField, userComboBox, buttons);
-        add(mainLayout);
+        add(chatRoomNameField, userComboBox);
 
         Binder<ChangeChatRoomOwnerDialog> binder = new Binder<>(ChangeChatRoomOwnerDialog.class);
         binder.setBean(this);
@@ -66,14 +52,6 @@ public class ChangeChatRoomOwnerDialog extends CustomizedDialog {
                 close();
             }
         });
-    }
-
-    public User getChosenUser() {
-        return chosenUser;
-    }
-
-    public void setChosenUser(User chosenUser) {
-        this.chosenUser = chosenUser;
     }
 
 }

@@ -1,18 +1,13 @@
 package com.pawban.communicator_frontend.view.communicator.dialog;
 
 import com.pawban.communicator_frontend.domain.ChatRoom;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.pawban.communicator_frontend.view.component.CustomizedDialog;
 import com.vaadin.flow.component.textfield.TextField;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-public class NewAccessRequestDialog extends Dialog {
+public class NewAccessRequestDialog extends CustomizedDialog {
 
     private final TextField senderField = new TextField("Sender");
     private final TextField chatRoomField = new TextField("Chat room");
@@ -20,9 +15,9 @@ public class NewAccessRequestDialog extends Dialog {
 
     private ChatRoom chatRoom;
 
-    public NewAccessRequestDialog(final BiConsumer<UUID, String> clickAction) {
-        H4 title = new H4("New access request");
-        title.getStyle().set("margin", "auto");
+    public NewAccessRequestDialog(final BiConsumer<UUID, String> sendAction) {
+        super("New access request");
+        setOkButtonText("Send");
 
         senderField.setReadOnly(true);
         senderField.setWidthFull();
@@ -30,24 +25,18 @@ public class NewAccessRequestDialog extends Dialog {
         chatRoomField.setReadOnly(true);
         chatRoomField.setWidthFull();
 
-        Button cancelButton = new Button("Cancel");
-        cancelButton.getStyle().set("margin-left", "auto");
-        cancelButton.addClickListener(buttonClickEvent -> this.close());
+        request.focus();
+        request.setTabIndex(1);
 
-        Button sendButton = new Button("Send");
-        sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        sendButton.addClickListener(buttonClickEvent -> {
+        setOkButtonClickListener(buttonClickEvent -> {
             if (request.isValid()) {
-                clickAction.accept(chatRoom.getId(), request.getValue());
-                this.close();
+                sendAction.accept(chatRoom.getId(), request.getValue());
+                close();
             }
         });
 
-        HorizontalLayout buttons = new HorizontalLayout(cancelButton, sendButton);
-
-        VerticalLayout mainLayout = new VerticalLayout(title, senderField, chatRoomField, request, buttons);
-
-        add(mainLayout);
+        add(senderField, chatRoomField, request);
+        setWidth("500px");
     }
 
     @Override

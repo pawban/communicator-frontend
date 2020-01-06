@@ -1,57 +1,55 @@
 package com.pawban.communicator_frontend.view.communicator.dialog;
 
 import com.pawban.communicator_frontend.domain.AccessRequest;
-import com.vaadin.flow.component.button.Button;
+import com.pawban.communicator_frontend.view.component.CustomizedDialog;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-public class ReceivedAccessRequestDialog extends Dialog {
+public class ReceivedAccessRequestDialog extends CustomizedDialog {
 
     public ReceivedAccessRequestDialog(final AccessRequest accessRequest,
                                        final BiConsumer<UUID, Boolean> clickAction) {
-        H4 title = new H4("You have received new access request");
-        title.getStyle().set("margin", "auto");
+        super("You have received new access request");
+        setOkButtonText("Accept");
+        setOkButtonThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        setCancelButtonText("Reject");
+        setCancelButtonThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
-        Label infoLabel = new Label("<b>" + accessRequest.getSender().getUsername() +
-                "</b> has sent you request to join to your chat room <b>" + accessRequest.getChatRoom().getName() +
-                "</b> with following explanation:");
+        Span usernameSpan = new Span(accessRequest.getSender().getUsername());
+        usernameSpan.getStyle().set("font-weight", "bold");
+        Span chatRoomSpan = new Span(accessRequest.getChatRoom().getName());
+        chatRoomSpan.getStyle().set("font-weight", "bold");
+        Label infoLabel = new Label();
+        infoLabel.add(
+                usernameSpan,
+                new Text(" has sent to you request to join to your chat room "),
+                chatRoomSpan,
+                new Text(" with following explanation:")
+        );
         infoLabel.setWidthFull();
 
         Label requestLabel = new Label(accessRequest.getRequest());
         requestLabel.setWidthFull();
-        requestLabel.getStyle().set("font_style", "italic");
+        requestLabel.getStyle().set("font-style", "italic");
 
-        Button rejectButton = new Button("Reject");
-        rejectButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
-        rejectButton.addClickListener(buttonClickEvent -> {
+        setCancelButtonClickListener(buttonClickEvent -> {
             clickAction.accept(accessRequest.getId(), false);
-            this.close();
+            close();
         });
 
-        Button acceptButton = new Button("Accept");
-        acceptButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        acceptButton.getStyle().set("margin-left", "auto");
-        acceptButton.addClickListener(buttonClickEvent -> {
+        setOkButtonClickListener(buttonClickEvent -> {
             clickAction.accept(accessRequest.getId(), true);
             this.close();
         });
 
-        HorizontalLayout buttons = new HorizontalLayout(rejectButton, acceptButton);
-        buttons.setWidthFull();
-
-        VerticalLayout mainLayout = new VerticalLayout(title, infoLabel, requestLabel, buttons);
-        add(mainLayout);
-
+        add(infoLabel, requestLabel);
         setWidth("500px");
         setCloseOnEsc(false);
-        setCloseOnOutsideClick(false);
         open();
     }
 
