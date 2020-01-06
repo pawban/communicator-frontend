@@ -345,6 +345,7 @@ public class CommunicatorView extends HorizontalLayout {
         chatRoomsTabs.getDisplayedChatRooms().forEach(chatRoom -> {
             if (!availableChatRoomsIds.containsKey(chatRoom.getId())) {
                 removeChatRoomFromView(chatRoom);
+                new CustomNotification("Chat room '" + chatRoom.getName() + "' is no longer available.");
             } else {
                 chatRoom.setOwner(availableChatRoomsIds.get(chatRoom.getId()).getOwner());
             }
