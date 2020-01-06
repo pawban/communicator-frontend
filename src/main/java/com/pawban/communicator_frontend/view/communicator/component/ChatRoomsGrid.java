@@ -6,8 +6,8 @@ import com.pawban.communicator_frontend.session.CommunicatorSession;
 import com.pawban.communicator_frontend.type.ChatRoomStatus;
 import com.pawban.communicator_frontend.type.MembershipRole;
 import com.pawban.communicator_frontend.view.communicator.dialog.ChangeChatRoomOwnerDialog;
-import com.pawban.communicator_frontend.view.communicator.dialog.ChatRoomCloseConfirmDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewAccessRequestDialog;
+import com.pawban.communicator_frontend.view.component.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
@@ -89,9 +89,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
             case MEMBER:
                 icon = VaadinIcon.MINUS_CIRCLE.create();
                 icon.getElement().setAttribute("title", "Leave this chat room");
-                icon.addClickListener(iconClickEvent ->
-                        new ChatRoomCloseConfirmDialog(() -> leaveChatRoomAction.accept(chatRoom))
-                );
+                icon.addClickListener(iconClickEvent -> openLeaveChatRoomConfirmDialog(chatRoom));
                 break;
             case OWNER:
                 icon = VaadinIcon.EXCHANGE.create();
@@ -107,6 +105,16 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
         icon.getStyle().set("cursor", "pointer");
         icon.setSize("16px");
         return icon;
+    }
+
+    private void openLeaveChatRoomConfirmDialog(final ChatRoom chatRoom) {
+        new ConfirmDialog(
+                "Leave chat room confirmation",
+                "Are you sure you want to leave this chat room? You'll loose access to it. " +
+                        "New access request is required to rejoin this chat room.",
+                "Leave chat room",
+                () -> leaveChatRoomAction.accept(chatRoom)
+        );
     }
 
     private MembershipRole getCurrentUserRole(final ChatRoom chatRoom) {

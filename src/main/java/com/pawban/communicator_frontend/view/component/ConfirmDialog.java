@@ -1,4 +1,4 @@
-package com.pawban.communicator_frontend.view.communicator.dialog;
+package com.pawban.communicator_frontend.view.component;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -8,25 +8,28 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class ChatRoomCloseConfirmDialog extends Dialog {
+public class ConfirmDialog extends Dialog {
 
-    public ChatRoomCloseConfirmDialog(final Runnable confirmAction) {
-        H3 title = new H3("Close chat room confirmation");
+    public ConfirmDialog(final String titleText,
+                         final String messageText,
+                         final String confirmButtonText,
+                         final Runnable action) {
+        H3 title = new H3(titleText);
         title.getStyle().set("margin", "auto");
 
-        Label textLabel = new Label("Are you sure you want to leave this chat room? You'll loose access to it. " +
-                "New access request is required to rejoin this chat room.");
+        Label textLabel = new Label(messageText);
         textLabel.setWidthFull();
 
         Button cancelButton = new Button("Cancel");
-        cancelButton.addClickListener(buttonClickEvent -> this.close());
+        cancelButton.addClickListener(buttonClickEvent -> close());
+        cancelButton.focus();
 
-        Button confirmButton = new Button("Leave chat room");
+        Button confirmButton = new Button(confirmButtonText);
         confirmButton.getStyle().set("margin-left", "auto");
         confirmButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
         confirmButton.addClickListener(buttonClickEvent -> {
-            confirmAction.run();
-            this.close();
+            action.run();
+            close();
         });
 
         HorizontalLayout buttons = new HorizontalLayout(cancelButton, confirmButton);

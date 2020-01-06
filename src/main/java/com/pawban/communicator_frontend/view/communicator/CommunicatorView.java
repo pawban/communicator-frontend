@@ -37,15 +37,13 @@ import com.pawban.communicator_frontend.view.communicator.component.SendMessageB
 import com.pawban.communicator_frontend.view.communicator.component.UsersGrid;
 import com.pawban.communicator_frontend.view.communicator.component.UsersPanel;
 import com.pawban.communicator_frontend.view.communicator.component.VisibilityIcon;
-import com.pawban.communicator_frontend.view.communicator.dialog.ChatRoomCloseConfirmDialog;
-import com.pawban.communicator_frontend.view.communicator.dialog.ChatRoomDeleteConfirmDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.CustomNotification;
 import com.pawban.communicator_frontend.view.communicator.dialog.ErrorDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewAccessRequestDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.NewChatRoomDialog;
 import com.pawban.communicator_frontend.view.communicator.dialog.ProcessedAccessRequestNotification;
 import com.pawban.communicator_frontend.view.communicator.dialog.ReceivedAccessRequestDialog;
-import com.pawban.communicator_frontend.view.communicator.dialog.UserDeleteConfirmDialog;
+import com.pawban.communicator_frontend.view.component.ConfirmDialog;
 import com.pawban.communicator_frontend.view.newuser.NewUserView;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
@@ -124,13 +122,9 @@ public class CommunicatorView extends HorizontalLayout {
         visibilityIcon = new VisibilityIcon(session.getUser().getVisible());
         refreshChatRooms();
         refreshUsers();
-        deleteUserIcon.addClickListener(iconClickEvent -> new UserDeleteConfirmDialog(this::deleteCurrentUser));
-        leaveChatRoomIcon.addClickListener(iconClickEvent -> new ChatRoomCloseConfirmDialog(
-                () -> removeCurrentUserFromChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
-        ));
-        deleteChatRoomIcon.addClickListener(iconClickEvent -> new ChatRoomDeleteConfirmDialog(
-                () -> deleteChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
-        ));
+        deleteUserIcon.addClickListener(iconClickEvent -> openDeleteUserConfirmDialog());
+        leaveChatRoomIcon.addClickListener(iconClickEvent -> openLeaveChatRoomConfirmDialog());
+        deleteChatRoomIcon.addClickListener(iconClickEvent -> openDeleteChatRoomConfirmDialog());
         createNewChatRoomIcon.addClickListener(iconClickEvent -> new NewChatRoomDialog(this::createNewChatRoom));
         messageInput.addKeyDownListener(Key.ENTER, keyPressEvent -> sendMessageButton.click());
         sendMessageButton.addClickListener(buttonClickEvent -> sendMessage());
@@ -140,6 +134,35 @@ public class CommunicatorView extends HorizontalLayout {
         buildView();
 
         registerSchedulerTasks();
+    }
+
+    private void openDeleteUserConfirmDialog() {
+        new ConfirmDialog(
+                "User delete confirmation",
+                "Are you sure you want to close this session and delete the user account? " +
+                        "This operation is irreversible!",
+                "Delete user",
+                this::deleteCurrentUser
+        ).open();
+    }
+
+    private void openDeleteChatRoomConfirmDialog() {
+        new ConfirmDialog(
+                "Delete chat room confirmation",
+                "Are you sure you want to delete this chat room? This operation is irreversible!",
+                "Delete chat room",
+                () -> deleteChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
+        ).open();
+    }
+
+    private void openLeaveChatRoomConfirmDialog() {
+        new ConfirmDialog(
+                "Leave chat room confirmation",
+                "Are you sure you want to leave this chat room? You'll loose access to it. " +
+                        "New access request is required to rejoin this chat room.",
+                "Leave chat room",
+                () -> removeCurrentUserFromChatRoom(chatRoomsTabs.getSelectedTab().getChatRoom())
+        ).open();
     }
 
     private void registerSchedulerTasks() {
