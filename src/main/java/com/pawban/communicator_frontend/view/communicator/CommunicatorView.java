@@ -45,6 +45,7 @@ import com.pawban.communicator_frontend.view.communicator.dialog.ProcessedAccess
 import com.pawban.communicator_frontend.view.communicator.dialog.ReceivedAccessRequestDialog;
 import com.pawban.communicator_frontend.view.component.ConfirmDialog;
 import com.pawban.communicator_frontend.view.newuser.NewUserView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;
@@ -209,10 +210,13 @@ public class CommunicatorView extends HorizontalLayout {
             );
             if (!newMessages.isEmpty()) {
                 UI ui = getUI().orElseThrow(UIInaccessibleException::new);
-                ui.access(() -> tabsToChatRooms.get(tab).add(newMessages.stream()
+                List<Component> components = newMessages.stream()
                         .map(MessageComponent::new)
-                        .collect(Collectors.toList())
-                ));
+                        .collect(Collectors.toList());
+                ui.access(() -> {
+                    tabsToChatRooms.get(tab).add(components);
+                    components.get(components.size() - 1).getElement().executeJs("this.scrollIntoView()");
+                });
             }
         }
     }
