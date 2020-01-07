@@ -1,7 +1,9 @@
 package com.pawban.communicator_frontend.view.communicator.dialog;
 
 import com.pawban.communicator_frontend.domain.ChatRoom;
+import com.pawban.communicator_frontend.domain.User;
 import com.pawban.communicator_frontend.view.component.CustomizedDialog;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.textfield.TextField;
 
 import java.util.function.BiConsumer;
@@ -14,11 +16,13 @@ public class NewAccessRequestDialog extends CustomizedDialog {
 
     private ChatRoom chatRoom;
 
-    public NewAccessRequestDialog(final BiConsumer<ChatRoom, String> sendAction) {
+    public NewAccessRequestDialog(final User sender,
+                                  final BiConsumer<ChatRoom, String> sendAction) {
         super("New access request");
         setOkButtonText("Send");
 
         senderField.setReadOnly(true);
+        senderField.setValue(sender.getUsername());
         senderField.setWidthFull();
 
         chatRoomField.setReadOnly(true);

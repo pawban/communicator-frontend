@@ -114,7 +114,7 @@ public class CommunicatorView extends HorizontalLayout {
 
         chatRoomsGrid = new ChatRoomsGrid(
                 this.session,
-                new NewAccessRequestDialog(this::sendAccessRequest),
+                new NewAccessRequestDialog(this.session.getCurrentUser(), this::sendAccessRequest),
                 this::removeCurrentUserFromChatRoom,
                 this::changeOwnerOfChatRoom,
                 this::changeStatusOfTheChatRoom,

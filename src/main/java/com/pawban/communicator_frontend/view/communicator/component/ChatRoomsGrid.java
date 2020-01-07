@@ -46,7 +46,6 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
         this.changeChatRoomStatusAction = changeChatRoomStatusAction;
         this.usersSupplier = usersSupplier;
 
-        this.dialog.setSenderName(session.getCurrentUser().getUsername());
         addThemeVariants(GridVariant.LUMO_COMPACT);
 
         setSelectionMode(SelectionMode.NONE);
