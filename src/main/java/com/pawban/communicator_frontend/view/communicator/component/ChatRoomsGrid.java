@@ -13,9 +13,11 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -29,7 +31,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
     private final BiConsumer<ChatRoom, ChatRoomStatus> changeChatRoomStatusAction;
     private final Function<ChatRoom, List<User>> usersSupplier;
 
-    private final List<ChatRoom> chatRooms = new ArrayList<>();
+    private final Set<ChatRoom> chatRooms = new TreeSet<>(Comparator.comparing(ChatRoom::getName));
 
     public ChatRoomsGrid(final CommunicatorSession session,
                          final NewAccessRequestDialog dialog,
@@ -57,6 +59,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
         addComponentColumn(this::createButton)
                 .setFlexGrow(0)
                 .setWidth("32px");
+        super.setItems(chatRooms);
     }
 
     private Icon createVisibilityIcon(final ChatRoom chatRoom) {
@@ -133,14 +136,14 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
 
     public void addChatRoom(final ChatRoom chatRoom) {
         chatRooms.add(chatRoom);
-        setItems(new ArrayList<>(chatRooms));
+        getDataProvider().refreshAll();
     }
 
     @Override
     public void setItems(Collection<ChatRoom> items) {
         chatRooms.clear();
         chatRooms.addAll(items);
-        super.setItems(items);
+        getDataProvider().refreshAll();
     }
 
 }
