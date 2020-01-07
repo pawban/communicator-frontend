@@ -10,6 +10,7 @@ import com.pawban.communicator_frontend.exception.UIInaccessibleException;
 import com.pawban.communicator_frontend.service.AccessRequestService;
 import com.pawban.communicator_frontend.service.ChatRoomService;
 import com.pawban.communicator_frontend.service.MessageService;
+import com.pawban.communicator_frontend.service.SchedulerService;
 import com.pawban.communicator_frontend.service.UserService;
 import com.pawban.communicator_frontend.session.CommunicatorSession;
 import com.pawban.communicator_frontend.type.ChatRoomStatus;
@@ -53,11 +54,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouteConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 
 import javax.validation.constraints.NotNull;
-import java.sql.Date;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,20 +64,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-public class CommunicatorView extends HorizontalLayout {
+import static com.pawban.communicator_frontend.type.ScheduledTaskId.CHECK_PENDING_ACCESS_REQUESTS;
+import static com.pawban.communicator_frontend.type.ScheduledTaskId.CHECK_PROCESSED_ACCESS_REQUESTS;
+import static com.pawban.communicator_frontend.type.ScheduledTaskId.REFRESH_MESSAGES;
+import static com.pawban.communicator_frontend.type.ScheduledTaskId.REFRESH_VIEW;
 
-    private final TaskScheduler taskScheduler;
-    private final Set<ScheduledFuture<?>> scheduledFutures = new HashSet<>();
+public class CommunicatorView extends HorizontalLayout {
 
     private final CommunicatorSession session;
     private final UserService userService;
     private final ChatRoomService chatRoomService;
     private final AccessRequestService accessRequestService;
     private final MessageService messageService;
+    private final SchedulerService schedulerService;
 
     private final ChatRoomsGrid chatRoomsGrid;
     private final ChatRoomsTabs chatRoomsTabs = new ChatRoomsTabs();
@@ -97,20 +97,19 @@ public class CommunicatorView extends HorizontalLayout {
     private final AtomicReference<ChatRoomMessagesDiv> currentChatRoom = new AtomicReference<>();
     private final Map<ChatRoomTab, ChatRoomMessagesDiv> tabsToChatRooms = new HashMap<>();
     private final Set<AccessRequest> pendingAccessRequests = new HashSet<>();
-    private ScheduledFuture<?> checkPendingAccessRequestsTask;
 
     public CommunicatorView(@Autowired final CommunicatorSession session,
                             @Autowired final UserService userService,
                             @Autowired final ChatRoomService chatRoomService,
                             @Autowired final AccessRequestService accessRequestService,
                             @Autowired final MessageService messageService,
-                            @Autowired final TaskScheduler taskScheduler) {
+                            @Autowired final SchedulerService schedulerService) {
         this.session = session;
         this.userService = userService;
         this.chatRoomService = chatRoomService;
         this.accessRequestService = accessRequestService;
         this.messageService = messageService;
-        this.taskScheduler = taskScheduler;
+        this.schedulerService = schedulerService;
 
         chatRoomsGrid = new ChatRoomsGrid(
                 this.session,
@@ -123,6 +122,7 @@ public class CommunicatorView extends HorizontalLayout {
         visibilityIcon = new VisibilityIcon(session.getCurrentUser().getVisible());
         refreshChatRooms();
         refreshUsers();
+
         deleteUserIcon.addClickListener(iconClickEvent -> openDeleteUserConfirmDialog());
         leaveChatRoomIcon.addClickListener(iconClickEvent -> openLeaveChatRoomConfirmDialog());
         deleteChatRoomIcon.addClickListener(iconClickEvent -> openDeleteChatRoomConfirmDialog());
@@ -167,29 +167,13 @@ public class CommunicatorView extends HorizontalLayout {
     }
 
     private void registerSchedulerTasks() {
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
-                this::refreshView,
-                Date.from(Instant.now().plusMillis(5000L)),
-                5000L
-        ));
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
-                this::refreshMessages,
-                Date.from(Instant.now().plusMillis(2500L)),
-                2500L
-        ));
-        scheduledFutures.add(taskScheduler.scheduleAtFixedRate(
-                this::checkPendingAccessRequests,
-                Date.from(Instant.now().plusMillis(30000L)),
-                30000L
-        ));
+        schedulerService.addTask(REFRESH_VIEW, 5000L, this::refreshView);
+        schedulerService.addTask(REFRESH_MESSAGES, 2500L, this::refreshMessages);
+        schedulerService.addTask(CHECK_PENDING_ACCESS_REQUESTS, 30000L, this::checkPendingAccessRequests);
     }
 
     private void unregisterSchedulerTasks() {
-        scheduledFutures.forEach(task -> task.cancel(true));
-        scheduledFutures.clear();
-        if (checkPendingAccessRequestsTask != null) {
-            cancelPendingAccessRequestTask();
-        }
+        schedulerService.removeAll();
     }
 
     private void refreshView() {
@@ -199,6 +183,33 @@ public class CommunicatorView extends HorizontalLayout {
             refreshChatRooms();
             refreshUsers();
         });
+    }
+
+    private void refreshSessionData() {
+        this.session.setSession(userService.getSessionData(session.getSessionId()));
+        this.session.getChatRooms().addAll(userService.getCurrentUserChatRooms(session.getSessionId()));
+    }
+
+    private void refreshChatRooms() {
+        List<ChatRoom> availableChatRooms = chatRoomService.getAvailableChatRooms(session.getSessionId());
+        chatRoomsGrid.setItems(availableChatRooms);
+        Map<UUID, ChatRoom> availableChatRoomsIds = availableChatRooms.stream()
+                .collect(Collectors.toMap(ChatRoom::getId, chatRoom -> chatRoom));
+        chatRoomsTabs.getDisplayedChatRooms().forEach(chatRoom -> {
+            if (!availableChatRoomsIds.containsKey(chatRoom.getId())) {
+                removeChatRoomFromView(chatRoom);
+                new CustomNotification("Chat room '" + chatRoom.getName() + "' is no longer available.");
+            } else {
+                chatRoom.setOwner(availableChatRoomsIds.get(chatRoom.getId()).getOwner());
+            }
+        });
+        changeTab();
+        session.getChatRooms().stream()
+                .filter(chatRoomsTabs::isNotDisplayed)
+                .forEach(chatRoom -> {
+                    addChatRoomToView(chatRoom);
+                    new CustomNotification("You've been added to chat room '" + chatRoom.getName() + "'.");
+                });
     }
 
     private void refreshMessages() {
@@ -221,19 +232,6 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void processAccessRequest(final AccessRequest accessRequest,
-                                      @NotNull final Boolean accepted) {
-        try {
-            if (accepted) {
-                accessRequestService.acceptAccessRequest(session.getSessionId(), accessRequest);
-            } else {
-                accessRequestService.rejectAccessRequest(session.getSessionId(), accessRequest);
-            }
-        } catch (RequestUnsuccessfulException e) {
-            new ErrorDialog("Processing of access request has failed.");
-        }
-    }
-
     private void checkPendingAccessRequests() {
         try {
             UI ui = getUI().orElseThrow(UIInaccessibleException::new);
@@ -249,14 +247,18 @@ public class CommunicatorView extends HorizontalLayout {
         }
     }
 
-    private void refreshSessionData() {
-        this.session.setSession(userService.getSessionData(session.getSessionId()));
-        this.session.getChatRooms().addAll(userService.getCurrentUserChatRooms(session.getSessionId()));
+    private void cancelProcessedAccessRequestTask() {
+        schedulerService.removeTask(CHECK_PROCESSED_ACCESS_REQUESTS);
     }
 
-    private void cancelPendingAccessRequestTask() {
-        checkPendingAccessRequestsTask.cancel(true);
-        checkPendingAccessRequestsTask = null;
+    private void addChatRoomToView(final ChatRoom chatRoom) {
+        if (!exists(chatRoom)) {
+            ChatRoomTab tab = new ChatRoomTab(chatRoom);
+            chatRoomsTabs.add(tab);
+            ChatRoomMessagesDiv messagesDiv = new ChatRoomMessagesDiv(chatRoom.getId());
+            chatRoomMessagesPanel.add(messagesDiv);
+            tabsToChatRooms.put(tab, messagesDiv);
+        }
     }
 
     private void removeChatRoomFromView(ChatRoom chatRoom) {
@@ -278,20 +280,22 @@ public class CommunicatorView extends HorizontalLayout {
         chatRoomMessagesPanel.remove(messagesDiv);
     }
 
-    private void addChatRoomToView(final ChatRoom chatRoom) {
-        if (!exists(chatRoom)) {
-            ChatRoomTab tab = new ChatRoomTab(chatRoom);
-            chatRoomsTabs.add(tab);
-            ChatRoomMessagesDiv messagesDiv = new ChatRoomMessagesDiv(chatRoom.getId());
-            chatRoomMessagesPanel.add(messagesDiv);
-            tabsToChatRooms.put(tab, messagesDiv);
-        }
-    }
-
-    // helper methods
     private boolean exists(final ChatRoom chatRoom) {
         return tabsToChatRooms.keySet().stream()
                 .anyMatch(tab -> tab.getChatRoom().equals(chatRoom));
+    }
+
+    private void processAccessRequest(final AccessRequest accessRequest,
+                                      @NotNull final Boolean accepted) {
+        try {
+            if (accepted) {
+                accessRequestService.acceptAccessRequest(session.getSessionId(), accessRequest);
+            } else {
+                accessRequestService.rejectAccessRequest(session.getSessionId(), accessRequest);
+            }
+        } catch (RequestUnsuccessfulException e) {
+            new ErrorDialog("Processing of access request has failed.");
+        }
     }
 
     private void sendMessage() {
@@ -339,28 +343,6 @@ public class CommunicatorView extends HorizontalLayout {
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Changing owner of the chat room has failed.");
         }
-    }
-
-    private void refreshChatRooms() {
-        List<ChatRoom> availableChatRooms = chatRoomService.getAvailableChatRooms(session.getSessionId());
-        chatRoomsGrid.setItems(availableChatRooms);
-        Map<UUID, ChatRoom> availableChatRoomsIds = availableChatRooms.stream()
-                .collect(Collectors.toMap(ChatRoom::getId, chatRoom -> chatRoom));
-        chatRoomsTabs.getDisplayedChatRooms().forEach(chatRoom -> {
-            if (!availableChatRoomsIds.containsKey(chatRoom.getId())) {
-                removeChatRoomFromView(chatRoom);
-                new CustomNotification("Chat room '" + chatRoom.getName() + "' is no longer available.");
-            } else {
-                chatRoom.setOwner(availableChatRoomsIds.get(chatRoom.getId()).getOwner());
-            }
-        });
-        changeTab();
-        session.getChatRooms().stream()
-                .filter(chatRoomsTabs::isNotDisplayed)
-                .forEach(chatRoom -> {
-                    addChatRoomToView(chatRoom);
-                    new CustomNotification("You've been added to chat room '" + chatRoom.getName() + "'.");
-                });
     }
 
     private void deleteChatRoom(final ChatRoom chatRoom) {
@@ -444,12 +426,8 @@ public class CommunicatorView extends HorizontalLayout {
             pendingAccessRequests.add(
                     accessRequestService.createAccessRequest(session.getSessionId(), chatRoom, request)
             );
-            if (checkPendingAccessRequestsTask == null) {
-                checkPendingAccessRequestsTask = taskScheduler.scheduleAtFixedRate(
-                        this::checkProcessedAccessRequests,
-                        java.util.Date.from(Instant.now().plusMillis(5000L)),
-                        5000L
-                );
+            if (!schedulerService.taskExists(CHECK_PROCESSED_ACCESS_REQUESTS)) {
+                schedulerService.addTask(CHECK_PROCESSED_ACCESS_REQUESTS, 5000L, this::checkProcessedAccessRequests);
             }
             new CustomNotification("Access request has been sent.");
         } catch (RequestUnsuccessfulException e) {
@@ -465,7 +443,7 @@ public class CommunicatorView extends HorizontalLayout {
                 ui.access(() -> accessRequests.forEach(accessRequest -> {
                     pendingAccessRequests.removeIf(ar -> ar.equals(accessRequest));
                     if (pendingAccessRequests.isEmpty()) {
-                        cancelPendingAccessRequestTask();
+                        cancelProcessedAccessRequestTask();
                     }
                     new ProcessedAccessRequestNotification(accessRequest);
                 }));
@@ -485,35 +463,6 @@ public class CommunicatorView extends HorizontalLayout {
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Deletion of current user has failed.");
         }
-    }
-
-    // building the view
-    private void buildView() {
-        setSizeFull();
-
-        LeftPanel leftPanel = buildLeftPanel();
-        add(leftPanel, buildRightPanel());
-        expand(leftPanel);
-
-        chatRoomsTabs.addSelectedChangeListener(event -> changeTab());
-        visibilityIcon.addClickListener(iconClickEvent -> changeCurrentUserVisibility());
-    }
-
-    private LeftPanel buildLeftPanel() {
-        LeftPanel leftPanel = new LeftPanel(buildHeader(session.getCurrentUser()),
-                buildTabsLayout(),
-                chatRoomMessagesPanel,
-                buildEnterMessagePanel()
-        );
-        leftPanel.expand(chatRoomMessagesPanel);
-        return leftPanel;
-    }
-
-    private RightPanel buildRightPanel() {
-        RightPanel rightPanel = new RightPanel();
-        rightPanel.addToPrimary(buildUsersPanel());
-        rightPanel.addToSecondary(buildChatRoomsPanel());
-        return rightPanel;
     }
 
     private void changeTab() {
@@ -549,6 +498,35 @@ public class CommunicatorView extends HorizontalLayout {
         } catch (RequestUnsuccessfulException e) {
             new ErrorDialog("Visibility change has failed.");
         }
+    }
+
+    // building the view
+    private void buildView() {
+        setSizeFull();
+
+        LeftPanel leftPanel = buildLeftPanel();
+        add(leftPanel, buildRightPanel());
+        expand(leftPanel);
+
+        chatRoomsTabs.addSelectedChangeListener(event -> changeTab());
+        visibilityIcon.addClickListener(iconClickEvent -> changeCurrentUserVisibility());
+    }
+
+    private LeftPanel buildLeftPanel() {
+        LeftPanel leftPanel = new LeftPanel(buildHeader(session.getCurrentUser()),
+                buildTabsLayout(),
+                chatRoomMessagesPanel,
+                buildEnterMessagePanel()
+        );
+        leftPanel.expand(chatRoomMessagesPanel);
+        return leftPanel;
+    }
+
+    private RightPanel buildRightPanel() {
+        RightPanel rightPanel = new RightPanel();
+        rightPanel.addToPrimary(buildUsersPanel());
+        rightPanel.addToSecondary(buildChatRoomsPanel());
+        return rightPanel;
     }
 
     private HeaderLayout buildHeader(final User user) {
