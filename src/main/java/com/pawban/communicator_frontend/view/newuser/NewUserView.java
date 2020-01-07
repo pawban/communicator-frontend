@@ -75,8 +75,12 @@ public class NewUserView extends VerticalLayout {
         binder.forField(username)
                 .asRequired("Username can't be empty.")
                 .withValidator(
-                        name -> name.matches("\\w{3,30}"),
-                        "Username length must be between 3 and 30. Username can contain only lowercase " +
+                        name -> name.length() >= 3 && name.length() <= 30,
+                        "Username length must be between 3 and 30."
+                )
+                .withValidator(
+                        name -> name.matches("\\w+"),
+                        "Username can contain only lowercase " +
                                 "letters, uppercase letters, digits and underscores."
                 )
                 .withValidator(
