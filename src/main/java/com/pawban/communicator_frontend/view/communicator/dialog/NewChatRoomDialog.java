@@ -19,7 +19,7 @@ public class NewChatRoomDialog extends CustomizedDialog {
 
     public NewChatRoomDialog(BiConsumer<String, ChatRoomStatus> createAction) {
         super("New chat room");
-        setOkButtonText("Create");
+        setOkButtonText("Create chat room");
 
         TextField nameField = new TextField("Chat room name");
         nameField.setPlaceholder("Enter new chat room name...");
