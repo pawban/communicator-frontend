@@ -86,7 +86,7 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
                 icon = VaadinIcon.PLUS_CIRCLE.create();
                 icon.getElement().setAttribute("title", "Send access request to the owner of this " +
                         "chat room to join it");
-                icon.addClickListener(iconClickEvent -> openDialog(chatRoom));
+                icon.addClickListener(iconClickEvent -> dialog.setChatRoom(chatRoom).open());
                 break;
             case MEMBER:
                 icon = VaadinIcon.MINUS_CIRCLE.create();
@@ -126,11 +126,6 @@ public class ChatRoomsGrid extends Grid<ChatRoom> {
         return session.getChatRooms().stream().anyMatch(cr -> cr.equals(chatRoom)) ?
                 MembershipRole.MEMBER :
                 MembershipRole.OUTSIDER;
-    }
-
-    private void openDialog(final ChatRoom chatRoom) {
-        dialog.setChatRoom(chatRoom);
-        dialog.open();
     }
 
     public void addChatRoom(final ChatRoom chatRoom) {

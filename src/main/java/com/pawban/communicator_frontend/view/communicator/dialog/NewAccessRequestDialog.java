@@ -48,13 +48,10 @@ public class NewAccessRequestDialog extends CustomizedDialog {
         super.close();
     }
 
-    public void setSenderName(final String name) {
-        senderField.setValue(name);
-    }
-
-    public void setChatRoom(ChatRoom chatRoom) {
+    public Dialog setChatRoom(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
         chatRoomField.setValue(chatRoom.getName());
+        return this;
     }
 
 }
