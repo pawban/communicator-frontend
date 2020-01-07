@@ -30,11 +30,6 @@ public class CommunicatorSession {
         this.currentUser = session.getUser();
     }
 
-    public boolean isCurrentUserMemberOf(final ChatRoom chatRoom) {
-        return chatRooms.stream()
-                .anyMatch(cr -> cr.equals(chatRoom));
-    }
-
     public boolean isCurrentUserOwnerOf(final ChatRoom chatRoom) {
         return chatRoom.getOwner().equals(currentUser);
     }
